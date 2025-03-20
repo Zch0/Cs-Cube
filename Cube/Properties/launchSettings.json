@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Cube": {
+      "commandName": "Project",
+      "hotReloadEnabled": false
+    }
+  }
+}
