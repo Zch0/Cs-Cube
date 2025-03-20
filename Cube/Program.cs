@@ -1,6 +1,6 @@
 ﻿class Cube
 {
-    public int width {  get; set; }
+    public int width { get; set; }
     public int height { get; set; }
     public int length { get; set; }
     public Screen screen { get; }
@@ -11,11 +11,11 @@
     private int[,] vertices;
     private int[,] edges;
 
-    public Cube(int width,int height,int length)
+    public Cube(int width, int height, int length)
     {
         this.width = width;
         this.height = height;
-        this.length = length/2;
+        this.length = length / 2;
         this.screen = new Screen(width, height);
         this.centerX = width / 2;
         this.centerY = height / 2;
@@ -36,7 +36,7 @@
             { 1, 1, 1 },
             { -1, 1, 1 }
         };
-        this.vertices = FormatVertices(this.vertices,this.length);
+        this.vertices = FormatVertices(this.vertices, this.length);
         this.edges = new int[12, 2] {
             { 0, 1 },
             { 1, 2 },
@@ -52,7 +52,7 @@
             { 3, 7 }
         };
     }
-    private int[,] FormatVertices(int[,] vertices,int lenth)
+    private int[,] FormatVertices(int[,] vertices, int lenth)
     {
         int rows = vertices.GetLength(0);
         int cols = vertices.GetLength(1);
@@ -66,28 +66,28 @@
         }
         return new_vertices;
     }
-    static private (double,double) RotateX(double y, double z, double angle)
+    static private (double, double) RotateX(double y, double z, double angle)
     {
         double rad = angle * Math.PI / 180;
         double new_y = y * Math.Cos(rad) - z * Math.Sin(rad);
         double new_z = y * Math.Sin(rad) + z * Math.Cos(rad);
         return (new_y, new_z);
     }
-    static private (double,double) RotateY(double x, double z, double angle)
+    static private (double, double) RotateY(double x, double z, double angle)
     {
         double rad = angle * Math.PI / 180;
         double new_x = x * Math.Cos(rad) - z * Math.Sin(rad);
         double new_z = x * Math.Sin(rad) + z * Math.Cos(rad);
         return (new_x, new_z);
     }
-    static private (double,double) RotateZ(double x, double y, double angle)
+    static private (double, double) RotateZ(double x, double y, double angle)
     {
         double rad = angle * Math.PI / 180;
         double new_x = x * Math.Cos(rad) - y * Math.Sin(rad);
         double new_y = x * Math.Sin(rad) + y * Math.Cos(rad);
         return (new_x, new_y);
     }
-    static public (double,double) Deconstruct_2D(double[] arr)
+    static public (double, double) Deconstruct_2D(double[] arr)
     {
         return (arr[0], arr[1]);
     }
@@ -108,7 +108,7 @@
         this.AutoRotate();
         for (int i = 0; i < this.edges.GetLength(0); i++)
         {
-            double x1= this.vertices[this.edges[i, 0], 0];
+            double x1 = this.vertices[this.edges[i, 0], 0];
             double y1 = this.vertices[this.edges[i, 0], 1];
             double z1 = this.vertices[this.edges[i, 0], 2];
             double x2 = this.vertices[this.edges[i, 1], 0];
@@ -129,7 +129,7 @@ class MainClass
 {
     public static void Main(string[] args)
     {
-        Cube cube = new Cube(256, 256, 128);
+        Cube cube = new Cube(512, 512, 256);
         while (true)
         {
             cube.Draw();

@@ -1,14 +1,23 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 public class Screen
 {
     public int width { get; set; }
-    public int height { get; set;}
+    public int height { get; set; }
 
     private bool[,] buffer;
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool WriteConsole(IntPtr hConsoleOutput, string lpBuffer, uint nNumberOfCharsToWrite, out uint lpNumberOfCharsWritten, IntPtr lpReserved);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr GetStdHandle(int nStdHandle);
+
+    private const int STD_OUTPUT_HANDLE = -11;
+    private IntPtr handle = GetStdHandle(STD_OUTPUT_HANDLE);
     public Screen(int width, int height)
-	{
-		this.width = width;
+    {
+        this.width = width;
         this.height = height;
         this.buffer = new bool[width, height];
         Console.CursorVisible = false;
@@ -29,7 +38,6 @@ public class Screen
     {
         if (x < 0 || x >= this.width || y < 0 || y >= this.height)
         {
-            Console.WriteLine($"({x},{y})超界！！！");
             return;
         }
         this.buffer[(int)x, (int)y] = value;
@@ -146,6 +154,9 @@ public class Screen
             }
             buffer_str.Append('\n');
         }
-        Console.Write(buffer_str.ToString());
+        //Console.Write(buffer_str.ToString());
+        string message = buffer_str.ToString();
+        uint written;
+        WriteConsole(handle, message, (uint)message.Length, out written, IntPtr.Zero);
     }
 }
