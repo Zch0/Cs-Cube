@@ -10,6 +10,7 @@
     private double fps;
     private int[,] vertices;
     private int[,] edges;
+    private int[,] faces;
 
     public Cube(int width, int height, int length)
     {
@@ -51,6 +52,14 @@
             { 2, 6 },
             { 3, 7 }
         };
+        this.faces = new int[6,4] {
+            { 0, 1, 2, 3 },
+            { 4, 5, 6, 7 },
+            { 0, 1, 5, 4 },
+            { 2, 3, 7, 6 },
+            { 0, 3, 7, 4 },
+            { 1, 2, 6, 5 }
+        };
     }
     private int[,] FormatVertices(int[,] vertices, int lenth)
     {
@@ -87,10 +96,6 @@
         double new_y = x * Math.Sin(rad) + y * Math.Cos(rad);
         return (new_x, new_y);
     }
-    static public (double, double) Deconstruct_2D(double[] arr)
-    {
-        return (arr[0], arr[1]);
-    }
     private void AutoRotate()
     {
         this.angleX += this.angleX_increment;
@@ -99,6 +104,14 @@
         this.angleX = this.angleX % 360;
         this.angleY = this.angleY % 360;
         this.angleZ = this.angleZ % 360;
+    }
+    public (double,double,double,double) FaceEqPara(double x1,double y1,double z1, double x2,double y2,double z2,double x3,double y3,double z3)
+    {
+        double A = (y3 - y1) * (z3 - z1) - (z2 - z1) * (y3 - y1);
+        double B = (x3 - x1) * (z2 - z1) - (x2 - x1) * (z3 - z1);
+        double C = (x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1);
+        double D = -(A * x1 + B * y1 + C * z1);
+        return (A, B, C, D);
     }
     public void Draw()
     {
@@ -123,6 +136,42 @@
             this.screen.draw_line(x1 + this.centerX, y1 + this.centerY, x2 + this.centerX, y2 + this.centerY, true);
         }
     }
+    public void Menu()
+    {
+        if (Console.KeyAvailable)
+        {
+            var key = Console.ReadKey(true).Key;
+            switch (key)
+            {
+                case ConsoleKey.W:
+                    this.angleX_increment += 1.0;
+                    break;
+                case ConsoleKey.S:
+                    this.angleX_increment -= 1.0;
+                    break;
+                case ConsoleKey.A:
+                    this.angleY_increment -= 1.0;
+                    break;
+                case ConsoleKey.D:
+                    this.angleY_increment += 1.0;
+                    break;
+                case ConsoleKey.Q:
+                    this.angleZ_increment -= 1.0;
+                    break;
+                case ConsoleKey.E:
+                    this.angleZ_increment += 1.0;
+                    break;
+                case ConsoleKey.Escape:
+                    Environment.Exit(0);
+                    break;
+                case ConsoleKey.P:
+                    this.angleX_increment = 0;
+                    this.angleY_increment = 0;
+                    this.angleZ_increment = 0;
+                    break;
+            }
+        }
+    }
 }
 
 class MainClass
@@ -133,13 +182,8 @@ class MainClass
         while (true)
         {
             cube.Draw();
+            cube.Menu();
             cube.screen.display();
         }
-        //for (int i = 0; i < 100; i++)
-        //{
-        //    Thread.Sleep(100);
-        //    Console.WriteLine(i);
-        //    cube.screen.refresh_screen();
-        //}
     }
 }
