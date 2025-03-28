@@ -7,12 +7,13 @@ class Cube
     public int height { get; set; }
     public int length { get; set; }
     public long avg_runtime_us { get; set; }
-    public Queue<long> runtime_us_queue { get; set; } = new Queue<long>();
     public Screen screen { get; }
     private readonly int centerX, centerY;
     private double angleX, angleY, angleZ;
     private double angleX_increment, angleY_increment, angleZ_increment;
     private double angleX_per_us, angleY_per_us, angleZ_per_us;
+    private long RuntimeSum = 0;
+    private Queue<long> RuntimeQueue = new Queue<long>();
     private double[,] vertices;
     private (int, int)[] edges;
     private int[][] faces;
@@ -33,7 +34,7 @@ class Cube
         this.angleX_increment = 1.0;
         this.angleY_increment = 1.0;
         this.angleZ_increment = 1.0;
-        int angle_per_s = 60;
+        int angle_per_s = 20;
         this.angleX_per_us = (angle_per_s * angleX_increment) / 1_000_000.0; //每微秒绕X旋转的角度
         this.angleY_per_us = (angle_per_s * angleY_increment) / 1_000_000.0; //每微秒绕Y旋转的角度
         this.angleZ_per_us = (angle_per_s * angleZ_increment) / 1_000_000.0; //微秒绕Z旋转的角度
@@ -86,18 +87,18 @@ class Cube
         }
         return new_vertices;
     }
-    public long CalcAvgRuntimeUs()
+    public long CalcAvgRuntimeUs(long runtime_us)
     {
-        if (this.runtime_us_queue.Count >1000)
+        this.RuntimeQueue.Enqueue(runtime_us);
+        if (this.RuntimeQueue.Count < 10000)
         {
-            this.runtime_us_queue.Dequeue();
+            this.RuntimeSum += runtime_us;
         }
-        long sum = 0;
-        foreach (var runtime_us in this.runtime_us_queue)
-        {
-            sum += runtime_us;
+        else {
+            this.RuntimeSum-= this.RuntimeQueue.Dequeue();
+            this.RuntimeSum += runtime_us;
         }
-        return sum / this.runtime_us_queue.Count;
+        return RuntimeSum / this.RuntimeQueue.Count;
     }
     public Vector3 CalcFaceNormalVector(int[] face, double[,] transformed_vertices)
     {
@@ -146,9 +147,9 @@ class Cube
     }
     private void AutoRotate()
     {
-        this.angleX += this.angleX_per_us*this.avg_runtime_us;
-        this.angleY += this.angleY_per_us*this.avg_runtime_us;
-        this.angleZ += this.angleZ_per_us*this.avg_runtime_us;
+        this.angleX += this.angleX_per_us * this.avg_runtime_us;
+        this.angleY += this.angleY_per_us * this.avg_runtime_us;
+        this.angleZ += this.angleZ_per_us * this.avg_runtime_us;
         this.angleX = this.angleX % 360;
         this.angleY = this.angleY % 360;
         this.angleZ = this.angleZ % 360;
@@ -275,24 +276,20 @@ class MainClass
 {
     public static void Main(string[] args)
     {
-        Cube cube = new Cube(256, 256, 128);
+        Cube cube = new Cube(128, 128, 64);
         Stopwatch stopwatch = new Stopwatch();
 
         while (true)
         {
             stopwatch.Restart();
-            stopwatch.Start();
             cube.Draw();
-            cube.Menu();
+            //cube.Menu();
             cube.screen.Display();
             stopwatch.Stop();
             long current_runtime_us = stopwatch.ElapsedTicks / (Stopwatch.Frequency / 1_000_000);
-            cube.runtime_us_queue.Enqueue(current_runtime_us);
-            cube.avg_runtime_us = cube.CalcAvgRuntimeUs();
-            System.Diagnostics.Debug.WriteLine($"currentFPS:{1_000_000.0/current_runtime_us} avgFPS:{1_000_000.0/cube.avg_runtime_us}");
+            cube.avg_runtime_us = cube.CalcAvgRuntimeUs(current_runtime_us);
+            //System.Diagnostics.Debug.WriteLine(cube.avg_runtime_us);
+            //System.Diagnostics.Debug.WriteLine($"currentFPS:{1_000_000.0 / current_runtime_us} avgFPS:{1_000_000.0 / cube.avg_runtime_us}");
         }
-
-        //var vector = cube.CalcFaceNormalVector(new int[] { 0, 3, 7, 4 }, cube.vertices);
-        //Console.WriteLine(vector.ToString());
     }
 }

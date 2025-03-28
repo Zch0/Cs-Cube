@@ -115,11 +115,11 @@ public class Screen
             {
                 if (this.buffer[x, y])
                 {
-                    buffer_str.Append("██");
+                    buffer_str.Append('█');
                 }
                 else
                 {
-                    buffer_str.Append("  ");
+                    buffer_str.Append(' ');
                 }
             }
             buffer_str.Append('\n');
